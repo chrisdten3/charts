@@ -9,10 +9,10 @@ const StockComponent = ({ stock }) => {
     useEffect(() => {
         const fetchStockData = async () => {
             try {
-                const response = await fetch(`http://localhost:8003/api/history?ticker=${stock.symbol}`);
+                const response = await fetch(`https://charts-o3jf.onrender.com/api/history?ticker=${stock.symbol}`);
                 const data = await response.json();
                 setStockData(data);
-                const sampleResponse = await fetch(`http://localhost:8003/api/stock?ticker=${stock.symbol}`);
+                const sampleResponse = await fetch(`https://charts-o3jf.onrender.com/api/stock?ticker=${stock.symbol}`);
                 const sampleData = await sampleResponse.json();
                 setSampleStock(sampleData);
             } catch (error) {
