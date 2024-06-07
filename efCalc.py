@@ -55,23 +55,12 @@ def get_history(symbol):
     return json.dumps(output)
 
 def get_portfolio_allocations(tickers, period="1y", num_portfolios=25000, risk_free_rate=0.0515):
-    # Create an empty dictionary to store the data
-    data_dict = {}
-
-    # Loop through each ticker and download the historical data
-    for ticker in tickers:
-        stock = yf.Ticker(ticker)
-        data_dict[ticker] = stock.history(period=period)
-
-    # Create a DataFrame from the dictionary
-    data = pd.concat(data_dict, axis=1)
-
-    # Optionally, adjust the column levels for easier access
-    data.columns = data.columns.map('_'.join)
     # Grab data for multiple tickers
-    #data = yf.download(tickers, period=period)
+    data = yf.download(tickers, period=period)
     # Arrange the df so that the tickers are the columns and we have the closing prices
     data = data["Close"]
+    print("passed data download")
+    print(data.head())
     
     returns = data.pct_change()
     mean_returns = returns.mean()

@@ -50,7 +50,7 @@ const PortfolioComponent = ({ stocks }) => {
                         <p className="text-lg text-gray-500">Annualised Volatility: {maxSharpeAnnualisedVolatility * 100}%</p>
                     </div>
                 ) : (
-                    <p className="text-lg text-gray-500">No data available for Max Sharpe Portfolio</p>
+                    <p className="text-lg text-gray-500">Loading...Max Sharpe Portfolio</p>
                 )}
             </div>
 
@@ -64,7 +64,7 @@ const PortfolioComponent = ({ stocks }) => {
                         <p className="text-lg text-gray-500">Annualised Volatility: {minVolAnnualisedVolatility * 100}%</p>
                     </div>
                 ) : (
-                    <p className="text-lg text-gray-500">No data available for Min Volatility Portfolio</p>
+                    <p className="text-lg text-gray-500">Loading...Min Volatility Portfolio</p>
                 )}
             </div>
         </div>
