@@ -11,7 +11,7 @@ const PortfolioComponent = ({ stocks }) => {
     useEffect(() => {
         const symbols = stocks.map(stock => stock.symbol);
         const createPortfolio = async () => {
-            const response = await fetch(`https://charts-o3jf.onrender.com/api/portfolio?tickers=${symbols.join(",")}`);
+            const response = await fetch(`https://separate-rycca-charts-app-1ee2e16a.koyeb.app/api/portfolio?tickers=${symbols.join(',')}`);
             const data = await response.json();
 
             const maxSharpePortfolio = data.max_sharpe_portfolio;
