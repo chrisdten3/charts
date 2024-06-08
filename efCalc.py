@@ -54,62 +54,49 @@ def get_history(symbol):
     
     return json.dumps(output)
 
+
 def get_portfolio_allocations(tickers, period="1y", num_portfolios=25000, risk_free_rate=0.0515):
     # Grab data for multiple tickers
-    data = yf.download(tickers, period=period)
-    # Arrange the df so that the tickers are the columns and we have the closing prices
-    data = data["Close"]
-    print("passed data download")
-    print(data.head())
-    
+    data = yf.download(tickers, period=period)["Close"]
     returns = data.pct_change()
     mean_returns = returns.mean()
     cov_matrix = returns.cov()
 
-    # Function to calculate the returns and the volatility of the portfolio
     def portfolio_annualised_performance(weights, mean_returns, cov_matrix):
-        returns = np.sum(mean_returns * weights) * 252
+        returns = np.dot(mean_returns, weights) * 252
         std = np.sqrt(np.dot(weights.T, np.dot(cov_matrix, weights))) * np.sqrt(252)
         return std, returns
 
-    # Function to generate portfolios with random weights assigned to each stock in the portfolio
-    def random_portfolios(num_portfolios, mean_returns, cov_matrix, risk_free_rate):
-        results = np.zeros((3, num_portfolios))
-        weights_record = []
-        for i in range(num_portfolios):
-            weights = np.random.random(len(tickers))
-            weights /= np.sum(weights)
-            weights_record.append(weights)
-            portfolio_std_dev, portfolio_return = portfolio_annualised_performance(weights, mean_returns, cov_matrix)
-            results[0, i] = portfolio_std_dev
-            results[1, i] = portfolio_return
-            results[2, i] = (portfolio_return - risk_free_rate) / portfolio_std_dev  # Sharpe Ratio
-        return results, weights_record
+    weights_record = np.random.random((num_portfolios, len(tickers)))
+    weights_record /= weights_record.sum(axis=1)[:, np.newaxis]
 
-    def calculate_portfolio_allocations(mean_returns, cov_matrix, num_portfolios, risk_free_rate):
-        results, weights = random_portfolios(num_portfolios, mean_returns, cov_matrix, risk_free_rate)
+    portfolio_std_devs = np.zeros(num_portfolios)
+    portfolio_returns = np.zeros(num_portfolios)
 
-        # Maximum Sharpe Ratio Portfolio
-        max_sharpe_idx = np.argmax(results[2])
-        max_sharpe_allocation = {data.columns[i]: round(weight * 100, 2) for i, weight in enumerate(weights[max_sharpe_idx])}
+    for i in range(num_portfolios):
+        portfolio_std_devs[i], portfolio_returns[i] = portfolio_annualised_performance(
+            weights_record[i], mean_returns, cov_matrix
+        )
 
-        # Minimum Volatility Portfolio
-        min_vol_idx = np.argmin(results[0])
-        min_vol_allocation = {data.columns[i]: round(weight * 100, 2) for i, weight in enumerate(weights[min_vol_idx])}
+    sharpe_ratios = (portfolio_returns - risk_free_rate) / portfolio_std_devs
 
-        max_sharpe_portfolio = {
-            "Annualised Return": round(results[1, max_sharpe_idx], 2),
-            "Annualised Volatility": round(results[0, max_sharpe_idx], 2),
-            "Allocation": max_sharpe_allocation
-        }
+    max_sharpe_idx = np.argmax(sharpe_ratios)
+    min_vol_idx = np.argmin(portfolio_std_devs)
 
-        min_vol_portfolio = {
-            "Annualised Return": round(results[1, min_vol_idx], 2),
-            "Annualised Volatility": round(results[0, min_vol_idx], 2),
-            "Allocation": min_vol_allocation
-        }
+    max_sharpe_allocation = {data.columns[i]: round(weight * 100, 2) for i, weight in enumerate(weights_record[max_sharpe_idx])}
+    min_vol_allocation = {data.columns[i]: round(weight * 100, 2) for i, weight in enumerate(weights_record[min_vol_idx])}
 
-        return max_sharpe_portfolio, min_vol_portfolio
+    max_sharpe_portfolio = {
+        "Annualised Return": round(portfolio_returns[max_sharpe_idx], 2),
+        "Annualised Volatility": round(portfolio_std_devs[max_sharpe_idx], 2),
+        "Allocation": max_sharpe_allocation
+    }
 
-    max_sharpe_portfolio, min_vol_portfolio = calculate_portfolio_allocations(mean_returns, cov_matrix, num_portfolios, risk_free_rate)
+    min_vol_portfolio = {
+        "Annualised Return": round(portfolio_returns[min_vol_idx], 2),
+        "Annualised Volatility": round(portfolio_std_devs[min_vol_idx], 2),
+        "Allocation": min_vol_allocation
+    }
+
     return max_sharpe_portfolio, min_vol_portfolio
+
