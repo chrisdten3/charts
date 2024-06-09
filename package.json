@@ -19,6 +19,7 @@
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.1",
     "url": "^0.11.3",
+    "vercel": "^34.2.6",
     "web-vitals": "^2.1.4",
     "whatwg-url": "^14.0.0"
   },
