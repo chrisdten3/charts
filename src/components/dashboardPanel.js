@@ -16,7 +16,7 @@ const DashboardPanel = () => {
                 try {
                     const response = await fetch(`https://yfapi.net/v6/finance/autocomplete?query=${searchTerm}&lang=en`, {
                         headers: {
-                            'x-api-key': 'rychythJPY8baAHQxwgVH7VZRBp0MJ8252MjrBjq' // You need to get an API key from Yahoo Finance API
+                            'x-api-key': 'o8fuf3bUKL9WTnqUcbO0DY7Y68ZkVcj2zZqfJls3' // You need to get an API key from Yahoo Finance API
                         }
                     });
                     const data = await response.json();
