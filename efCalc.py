@@ -25,35 +25,26 @@ def get_stock_data(symbol):
 
 def get_history(symbol):
     name = yf.Ticker(symbol)
-    ticker = name.history(period="1y")
+    
+    # Fetch data while preventing auto-adjustments
+    ticker = name.history(period="1y", auto_adjust=False)
+    
+    # Drop dividends and stock splits columns if they exist
+    ticker = ticker.drop(columns=['Dividends', 'Stock Splits'], errors='ignore')
 
     ticker.index = pd.to_datetime(ticker.index)
-
     ticker['Date'] = ticker.index
 
     if not {'Date', 'Open', 'High', 'Low', 'Close'}.issubset(ticker.columns):
         raise ValueError("DataFrame must contain 'Date', 'Open', 'High', 'Low', 'Close' columns")
-    
 
-    series_data = []
-
-    for index,row in ticker.iterrows():
-        timestamp = int(row['Date'].timestamp() * 1000)
-        open_price = row['Open']
-        high_price = row['High']
-        low_price = row['Low']
-        close_price = row['Close']
-        
-        series_data.append([timestamp, open_price, high_price, low_price, close_price])
+    series_data = [
+        [int(row['Date'].timestamp() * 1000), row['Open'], row['High'], row['Low'], row['Close']]
+        for _, row in ticker.iterrows()
+    ]
     
-    output = {
-        "series": [{
-            "data": series_data
-        }]
-    }
-    
+    output = {"series": [{"data": series_data}]}
     return json.dumps(output)
-
 
 def get_portfolio_allocations(tickers, period="1y", num_portfolios=25000, risk_free_rate=0.0515):
     # Grab data for multiple tickers
